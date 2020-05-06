@@ -7,12 +7,18 @@
     <title>DragDrop</title>
   </head>
   <body>
-    <p class="bricks__text">Перетащите кирпич</p>
-    <p class="bricks__text bricks__text--count">Собрано 0</p>
-    <div class="droppable">Место для кирпича</div>
-    <div class="bricks" id="brick">
-      <div class="bricks__cont">кирпич</div>
+    <div class="bricks">
+      <p class="bricks__text">Перетащите кирпич</p>
+      <p class="bricks__text bricks__text--count">Осталось собрать 10 кирпича</p>
+      <div class="droppable">Место для кирпича</div>
+      <div class="bricks__pile">
+        <div id="df"></div>
+        <div class="bricks__block">
+          <div class="bricks__cont">кирпич</div>
+        </div>
+      </div>
     </div>
+    <div class="building"></div>
   </body>
   <script src="./js/app.js"></script>
 </html>

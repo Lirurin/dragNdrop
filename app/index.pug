@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 html(lang="en")
-    head
-        meta(charset="UTF-8")
-        meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        link(rel="stylesheet", href="./css/main.css")
-        title DragDrop
-    body
-        p.bricks__text Перетащите кирпич
-        p.bricks__text.bricks__text--count Собрано 0
-        .droppable Место для кирпича
-        #brick.bricks
-            .bricks__cont кирпич
-    script(src="./js/app.js")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet", href="./css/main.css")
+    title DragDrop
+  body
+    .bricks
+      p.bricks__text Перетащите кирпич
+      p.bricks__text.bricks__text--count Осталось собрать 10 кирпича
+      .droppable Место для кирпича
+      .bricks__pile
+        #df
+        .bricks__block
+          .bricks__cont кирпич
+    .building
+  script(src="./js/app.js")

@@ -1,13 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
   // variables
-  let bricks = document.querySelectorAll('.bricks__block')
-  let buildingArea = document.querySelector('.droppable');
-  let bricksPile = document.querySelector('.bricks__pile');
-  let building = document.querySelector('.building');
-  let areaOvered = false;
+  const bricks = document.querySelectorAll('.bricks__block')
+  const buildingArea = document.querySelector('.bricks__droppable');
+  const bricksPile = document.querySelector('.bricks__pile');
+  const building = document.querySelector('.building');
+  let isAreaOvered = false;
   let brickCount = 10;
   let pathsLength = [];
-  let path;
+  let paths;
 
   function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -15,9 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
     return Math.floor(Math.random() * (max - min)) + min;
   }
 
-  //svg load
+  // svg load
   function svgLoad() {
-    let xhr = new XMLHttpRequest;
+    const xhr = new XMLHttpRequest;
     xhr.open('get',`../img/${ getRandomInt(0, 3)}.svg`,true);
     xhr.onreadystatechange = function(){
       if (xhr.readyState != 4) return;
@@ -32,41 +32,38 @@ document.addEventListener('DOMContentLoaded', function() {
   svgLoad()
 
   function getSvgPath() {
-    path = document.querySelectorAll('.building svg path');
     pathsLength = [];
-    for (let i = 0; i < path.length; i++) {
-      pathsLength.push(path[i].getTotalLength())
-    }
+    paths = document.querySelectorAll('.building svg path');
+    pathsLength = Object.values(paths).map(path => path.getTotalLength());
   }
 
   function dragInit() {
-    for (let i = 0; i<bricks.length; i++) {
-      dragNdrop(bricks[i])
+    for (let brick of bricks) {
+      dragNdrop(brick)
     }
   }
   
   function addMaterialsToBuilding() {
-     for (let i = 0; i < path.length; i++) {
-      let currentLength = pathsLength[i];
-      path[i].style.stroke = '#000000',
-      path[i].style.strokeDasharray = currentLength + ' ' + currentLength;
-      path[i].style.strokeDashoffset = currentLength;
-      path[i].getBoundingClientRect();
-      path[i].style.transition = path[i].style.WebkitTransition =
-        'stroke-dashoffset 1s ease-in-out';
-      if (brickCount !== 0) {
-        path[i].style.strokeDashoffset = `${currentLength - currentLength/brickCount}`;
-      } else {
-        path[i].style.transition = path[i].style.WebkitTransition = 'fill 1s ease ';
-        path[i].style.fill = '#000000'
-      }
-      console.log('path', path)
-      console.log('currentLength', currentLength - currentLength/10*brickCount)
-    }
+    Object.values(paths).forEach((path, index) => {
+      const currentLength = pathsLength[index];
+      Object.assign(path.style, {
+        stroke: '#ffffff',
+        strokeDasharray: `${currentLength} ${currentLength}`,
+        strokeDashoffset: currentLength,
+        fill: brickCount > 0 ? 'transparent' : '#ffffff',
+      });
+      path.getBoundingClientRect();
+      if (brickCount > 0) {
+        Object.assign(path.style, {
+          transition: 'stroke-dashoffset 1s ease-in-out, fill 1s ease',
+          strokeDashoffset: `${currentLength - currentLength / brickCount}`,
+        });
+      } 
+    })
   }
 
   function createBrick() {
-    let newBrick = document.createElement("div");
+    const newBrick = document.createElement("div");
     newBrick.innerHTML = "<div class='bricks__cont'>кирпич</div>";
     newBrick.setAttribute('id', 'brick');
     newBrick.setAttribute('class', 'bricks__block');
@@ -75,51 +72,51 @@ document.addEventListener('DOMContentLoaded', function() {
     addMaterialsToBuilding()
   }
 
+  function createNewObject(node) {
+    return Object.create({
+      x1: node.getBoundingClientRect().left,
+      y1: node.getBoundingClientRect().top,
+      x2: node.getBoundingClientRect().left + node.getBoundingClientRect().width,
+      y2: node.getBoundingClientRect().top + node.getBoundingClientRect().height,
+    })
+  }
+  
   // dragNdrop
   function dragNdrop(brick) {
     brick.onmousedown = function(event) {
-      let shiftX = event.clientX - brick.getBoundingClientRect().left;
-      let shiftY = event.clientY - brick.getBoundingClientRect().top;
-      let buildingAreaParams = {
-        x1: buildingArea.getBoundingClientRect().left,
-        y1: buildingArea.getBoundingClientRect().top,
-        x2: buildingArea.getBoundingClientRect().left + buildingArea.getBoundingClientRect().width,
-        y2: buildingArea.getBoundingClientRect().top + buildingArea.getBoundingClientRect().height,
-      }
-      let brickAreaParams = {
-        x1: brick.getBoundingClientRect().left,
-        y1: brick.getBoundingClientRect().top,
-        x2: brick.getBoundingClientRect().left + brick.getBoundingClientRect().width,
-        y2: brick.getBoundingClientRect().top + brick.getBoundingClientRect().height,
-      }
+      
+      const shiftX = event.clientX - brick.getBoundingClientRect().left;
+      const shiftY = event.clientY - brick.getBoundingClientRect().top;
+      let buildingAreaParams = createNewObject(buildingArea)
+      let brickAreaParams = createNewObject(brick)
   
       brick.style.position = 'absolute';
       brick.style.zIndex = 1000;
       document.body.append(brick);
       moveAt(event.pageX, event.pageY);
       function moveAt(pageX, pageY) {
-        brick.style.left = pageX - shiftX + 'px';
-        brick.style.top = pageY - shiftY + 'px';
+        brick.style.left = `${pageX - shiftX}px`;
+        brick.style.top = `${pageY - shiftY}px`;
       }
-  
-      function onMouseMove(event) {
-        brickAreaParams = {
-          x1: brick.getBoundingClientRect().left,
-          y1: brick.getBoundingClientRect().top,
-          x2: brick.getBoundingClientRect().left + brick.getBoundingClientRect().width,
-          y2: brick.getBoundingClientRect().top + brick.getBoundingClientRect().height,
-        }
+      
+      // collision detection 
+      function detectCollision() {
+        const topCollide = brickAreaParams.y1 >= buildingAreaParams.y1 && brickAreaParams.y1 < buildingAreaParams.y2;
+        const bottomCollide = brickAreaParams.y2 < buildingAreaParams.y2 && brickAreaParams.y2 >= buildingAreaParams.y1;
+        const leftCollide = brickAreaParams.x2 < buildingAreaParams.x2 && brickAreaParams.x2 >= buildingAreaParams.x1;
+        const rightCollide = brickAreaParams.x1 >= buildingAreaParams.x1 && brickAreaParams.x1 < buildingAreaParams.x2;
+        return (rightCollide || leftCollide) && (topCollide || bottomCollide)
+      }
 
-        // collision detection 
-        if (((brickAreaParams.x1 >= buildingAreaParams.x1 && brickAreaParams.x1 < buildingAreaParams.x2) 
-        || (brickAreaParams.x2 < buildingAreaParams.x2 && brickAreaParams.x2 >= buildingAreaParams.x1))
-        && ((brickAreaParams.y1 >= buildingAreaParams.y1 && brickAreaParams.y1 < buildingAreaParams.y2) 
-        || (brickAreaParams.y2 < buildingAreaParams.y2 && brickAreaParams.y2 >= buildingAreaParams.y1))) {
+      function onMouseMove(event) {
+        brickAreaParams = createNewObject(brick)
+
+        if ( detectCollision() ) {
           enterDroppable(buildingArea);
-          areaOvered = true;
+          isAreaOvered = true;
         } else {
           leaveDroppable(buildingArea);
-          areaOvered = false;
+          isAreaOvered = false;
         }
         moveAt(event.pageX, event.pageY);
         brick.hidden = true;
@@ -128,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
       document.addEventListener('mousemove', onMouseMove);
       brick.onmouseup = function() {
-        if (areaOvered) {
+        if (isAreaOvered) {
           if (brickCount === 0) {
             brickCount = 10;
             building.removeChild(building.childNodes[0])

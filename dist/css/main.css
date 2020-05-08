@@ -1,22 +1,32 @@
+html {
+  background-color: #000;
+}
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
 }
-.droppable {
+.bricks {
+  padding-top: 15px;
+}
+.bricks__text {
+  color: #fff;
+  text-align: center;
+}
+.bricks__droppable {
   height: 200px;
   width: 200px;
-  border: 1px double #000;
+  border: 1px double #fff;
   margin: 0 auto;
-  box-shadow: 0 0 0 0 #000 inset;
+  background: url("/img/delivery.svg") center center no-repeat;
+  background-size: 40%;
+  color: #fff;
+  box-shadow: 0 0 0 0 #fff inset;
   transition: 0.3s box-shadow ease;
 }
 .hovered {
-  box-shadow: 0 0 10px 2px #000 inset;
+  box-shadow: 0 0 10px 2px #fff inset;
   transition: 0.3s box-shadow ease;
-}
-.bricks__text {
-  text-align: center;
 }
 .bricks__block {
   width: 80px;
@@ -56,5 +66,6 @@ body {
   height: 300px;
 }
 .building svg path {
-  fill: #fff;
+  fill: #000;
+  stroke: none;
 }
